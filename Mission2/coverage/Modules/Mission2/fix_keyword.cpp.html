@@ -102,7 +102,7 @@ int KeywordFixTool::checkCompleteHit(string keyword, int weekBestIndex, int twoB
 <span style = "background-color:#dfd">		if (node.name == keyword)</span>
 		{
 <span style = "background-color:#dfd">			if (node.point &lt; 10)
-				node.point++;</span>
+				node.point++;	// At least 1 point shall be increased for complete HIT</span>
 			else
 <span style = "background-color:#dfd">				node.point += (node.point * 0.1);
 			return node.point;</span>
@@ -114,7 +114,7 @@ int KeywordFixTool::checkCompleteHit(string keyword, int weekBestIndex, int twoB
 <span style = "background-color:#dfd">		if (node.name == keyword)</span>
 		{
 <span style = "background-color:#dfd">			if (node.point &lt; 10)
-				node.point++;</span>
+				node.point++;	// At least 1 point shall be increased for complete HIT</span>
 			else
 <span style = "background-color:#dfd">				node.point += (node.point * 0.1);
 			return node.point;</span>

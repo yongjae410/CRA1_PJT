@@ -91,7 +91,7 @@ int KeywordFixTool::checkCompleteHit(string keyword, int weekBestIndex, int twoB
 		if (node.name == keyword)
 		{
 			if (node.point < 10)
-				node.point++;
+				node.point++;	// At least 1 point shall be increased for complete HIT
 			else
 				node.point += (node.point * 0.1);
 			return node.point;
@@ -103,7 +103,7 @@ int KeywordFixTool::checkCompleteHit(string keyword, int weekBestIndex, int twoB
 		if (node.name == keyword)
 		{
 			if (node.point < 10)
-				node.point++;
+				node.point++;	// At least 1 point shall be increased for complete HIT
 			else
 				node.point += (node.point * 0.1);
 			return node.point;

@@ -125,7 +125,7 @@ int checkCompleteHit(string keyword, int weekBestIndex, int twoBestIndex)
 		if (node.name == keyword)
 		{
 			if (node.point < 10)
-				node.point++;
+				node.point++;	// At least 1 point shall be increased for complete HIT
 			else
 				node.point += (node.point * 0.1);
 			return node.point;
@@ -137,7 +137,7 @@ int checkCompleteHit(string keyword, int weekBestIndex, int twoBestIndex)
 		if (node.name == keyword)
 		{
 			if (node.point < 10)
-				node.point++;
+				node.point++;	// At least 1 point shall be increased for complete HIT
 			else
 				node.point += (node.point * 0.1);
 			return node.point;
