@@ -80,7 +80,7 @@ void resetPoint(int newMaxPoint)
 {
 	if (UZ >= MAX_POINT || newMaxPoint >= MAX_POINT)
 	{
-		UZ = 9.0;
+		UZ = 9;
 		for (int i = 0; i < WEEK_BEST_SLOT_NUM; i++)
 		{
 			int score = weekBest[i].size();
@@ -220,7 +220,7 @@ void inputFile(string filename)
 	string line;
 	while (getline(fin, line))
 	{
-		int pos = line.find(' ');
+		int pos = line.rfind(' ');
 		string keyword = line.substr(0, pos);
 		string day = line.substr(pos + 1);
 		string ret = fixKeyword(keyword, day);

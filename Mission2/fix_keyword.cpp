@@ -45,7 +45,7 @@ void KeywordFixTool::resetPoint(int updatedPoint)
 {
 	if (UZ >= MAX_POINT || updatedPoint >= MAX_POINT)
 	{
-		UZ = 9.0;
+		UZ = 9;
 		for (int i = 0; i < WEEK_BEST_SLOT_NUM; i++)
 		{
 			int score = weekBest[i].size();
