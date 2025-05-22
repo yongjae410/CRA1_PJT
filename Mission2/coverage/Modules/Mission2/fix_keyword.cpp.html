@@ -1,0 +1,254 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+        <meta charset="utf-8"/>
+	    <title>fix_keyword.cpp</title>
+	    <link href="../../third-party/google-code-prettify/prettify-CppCoverage.css" type="text/css" rel="stylesheet" />
+	    <script type="text/javascript" src="../../third-party/google-code-prettify/prettify.js"></script>
+	</head>
+    <body onload="prettyPrint()">
+        <h4></h4>
+        <pre class="prettyprint lang-cpp linenums">
+#include &lt;iostream&gt;
+#include &lt;fstream&gt;
+#include &lt;string&gt;
+#include &lt;vector&gt;
+#include &lt;map&gt;
+#include &lt;algorithm&gt;
+
+#include "fix_keyword.h"
+#include "levenshtein_algo.h"
+
+using namespace std;
+
+<span style = "background-color:#dfd">bool KeywordFixTool::similer(const std::string&amp; a, const std::string&amp; b) {
+	if (a.empty() || b.empty()) return false;</span>
+
+<span style = "background-color:#dfd">	int dist = algo-&gt;getSimilarity(a, b);
+	int max_len = std::max(a.length(), b.length());
+	double similarity = 1.0 - (double)dist / max_len;</span>
+
+<span style = "background-color:#dfd">	int score = 1 + static_cast&lt;int&gt;(similarity * 99);</span>
+
+<span style = "background-color:#dfd">	if (score &gt;= 80) return true;
+	return false;
+}</span>
+
+int KeywordFixTool::getWeekBestIndex(string day)
+<span style = "background-color:#dfd">{
+	if (day == "monday") return 0;
+	if (day == "tuesday") return 1;
+	if (day == "wednesday") return 2;
+	if (day == "thursday") return 3;
+	if (day == "friday") return 4;
+	if (day == "saturday") return 5;
+	if (day == "sunday") return 6;
+	return -1;
+}</span>
+
+int KeywordFixTool::getTwoBestIndex(int weekBestIndex)
+<span style = "background-color:#dfd">{
+	if (weekBestIndex &gt;= 0 &amp;&amp; weekBestIndex &lt;= 4) return 0;
+	return 1;
+}</span>
+
+void KeywordFixTool::resetPoint(int updatedPoint)
+<span style = "background-color:#dfd">{
+	if (UZ &gt;= MAX_POINT || updatedPoint &gt;= MAX_POINT)</span>
+	{
+<span style = "background-color:#dfd">		UZ = 9.0;
+		for (int i = 0; i &lt; WEEK_BEST_SLOT_NUM; i++)</span>
+		{
+<span style = "background-color:#dfd">			int score = weekBest[i].size();
+			for (Node&amp; node : weekBest[i])</span>
+			{
+<span style = "background-color:#dfd">				node.point = score;
+				score--;
+			}
+		}</span>
+
+<span style = "background-color:#dfd">		for (int i = 0; i &lt; TWO_BEST_SLOT_NUM; i++)</span>
+		{
+<span style = "background-color:#dfd">			int score = twoBest[i].size();
+			for (Node&amp; node : twoBest[i])</span>
+			{
+<span style = "background-color:#dfd">				node.point = score;
+				score--;
+			}
+		}</span>
+	}
+<span style = "background-color:#dfd">}</span>
+
+void KeywordFixTool::rearrangeSlot(int weekBestIndex, int twoBestIndex)
+<span style = "background-color:#dfd">{
+	std::sort(weekBest[weekBestIndex].rbegin(), weekBest[weekBestIndex].rend());
+	std::sort(twoBest[twoBestIndex].rbegin(), twoBest[twoBestIndex].rend());</span>
+
+<span style = "background-color:#dfd">	while (weekBest[weekBestIndex].size() &gt; 10)</span>
+	{
+<span style = "background-color:#dfd">		weekBest[weekBestIndex].pop_back();
+	}</span>
+
+<span style = "background-color:#dfd">	while (twoBest[twoBestIndex].size() &gt; 10)</span>
+	{
+<span style = "background-color:#dfd">		twoBest[twoBestIndex].pop_back();
+	}
+}</span>
+
+int KeywordFixTool::checkCompleteHit(string keyword, int weekBestIndex, int twoBestIndex)
+<span style = "background-color:#dfd">{
+	for (Node&amp; node : weekBest[weekBestIndex])</span>
+	{
+<span style = "background-color:#dfd">		if (node.name == keyword)</span>
+		{
+<span style = "background-color:#dfd">			if (node.point &lt; 10)
+				node.point++;</span>
+			else
+<span style = "background-color:#dfd">				node.point += (node.point * 0.1);
+			return node.point;</span>
+		}
+<span style = "background-color:#dfd">	}</span>
+
+<span style = "background-color:#dfd">	for (Node&amp; node : twoBest[twoBestIndex])</span>
+	{
+<span style = "background-color:#dfd">		if (node.name == keyword)</span>
+		{
+<span style = "background-color:#dfd">			if (node.point &lt; 10)
+				node.point++;</span>
+			else
+<span style = "background-color:#dfd">				node.point += (node.point * 0.1);
+			return node.point;</span>
+		}
+<span style = "background-color:#dfd">	}</span>
+
+<span style = "background-color:#dfd">	return 0;
+}</span>
+
+bool KeywordFixTool::checkSimilerHit(string keyword, int weekBestIndex, int twoBestIndex)
+<span style = "background-color:#dfd">{
+	for (Node&amp; node : weekBest[weekBestIndex])</span>
+	{
+<span style = "background-color:#dfd">		if (similer(node.name, keyword))</span>
+		{
+<span style = "background-color:#dfd">			return true;</span>
+		}
+<span style = "background-color:#dfd">	}</span>
+
+<span style = "background-color:#dfd">	for (Node&amp; node : twoBest[twoBestIndex])</span>
+	{
+<span style = "background-color:#dfd">		if (similer(node.name, keyword))</span>
+		{
+<span style = "background-color:#dfd">			return true;</span>
+		}
+<span style = "background-color:#dfd">	}</span>
+
+<span style = "background-color:#dfd">	return false;
+}</span>
+
+void KeywordFixTool::insertNewKeyword(string keyword, int weekBestIndex, int twoBestIndex)
+<span style = "background-color:#dfd">{
+	weekBest[weekBestIndex].push_back({ keyword, UZ });
+	twoBest[twoBestIndex].push_back({ keyword, UZ });
+}</span>
+
+string KeywordFixTool::fixKeyword(string keyword, string day)
+<span style = "background-color:#dfd">{
+	int weekBestIndex = getWeekBestIndex(day);
+	if (weekBestIndex == -1)</span>
+	{
+<span style = "background-color:#dfd">		return "";</span>
+	}
+<span style = "background-color:#dfd">	int twoBestIndex = getTwoBestIndex(weekBestIndex);</span>
+
+<span style = "background-color:#dfd">	int updatedPoint = 0;</span>
+	do
+	{
+<span style = "background-color:#dfd">		UZ++;
+		updatedPoint = checkCompleteHit(keyword, weekBestIndex, twoBestIndex);
+		if (updatedPoint != 0)</span>
+		{
+<span style = "background-color:#dfd">			break;</span>
+		}
+
+<span style = "background-color:#dfd">		bool similerHit = checkSimilerHit(keyword, weekBestIndex, twoBestIndex);
+		if (similerHit)</span>
+		{
+<span style = "background-color:#dfd">			break;</span>
+		}
+
+<span style = "background-color:#dfd">		insertNewKeyword(keyword, weekBestIndex, twoBestIndex);
+	} while (0);</span>
+
+<span style = "background-color:#dfd">	resetPoint(updatedPoint);
+	rearrangeSlot(weekBestIndex, twoBestIndex);
+	return keyword;
+}</span>
+
+void KeywordFixTool::inputFile(string filename)
+<span style = "background-color:#dfd">{
+	ifstream fin;
+	fin.open(filename.c_str());
+	if (!fin.is_open())</span>
+	{
+<span style = "background-color:#dfd">		std::cout &lt;&lt; "error while open file" &lt;&lt; std::endl;
+		return;</span>
+	}
+
+<span style = "background-color:#dfd">	string line;
+	while (getline(fin, line))</span>
+	{
+<span style = "background-color:#dfd">		int pos = line.rfind(' ');
+		string keyword = line.substr(0, pos);
+		string day = line.substr(pos + 1);
+		string ret = fixKeyword(keyword, day);
+		std::cout &lt;&lt; ret &lt;&lt; "\n";
+	}</span>
+
+<span style = "background-color:#dfd">	fin.close();
+}</span>
+
+void KeywordFixTool::initialize(SIMILARITY_ALGO algoNum)
+<span style = "background-color:#dfd">{
+	switch (algoNum)</span>
+	{
+	case ALGO_LEVENSHTEIN:
+<span style = "background-color:#dfd">		algo = new LevenshteinAlgo();</span>
+	default:
+		break;
+	}
+
+<span style = "background-color:#dfd">	UZ = 9;</span>
+
+<span style = "background-color:#dfd">	for (int i = 0; i &lt; WEEK_BEST_SLOT_NUM; i++)</span>
+	{
+<span style = "background-color:#dfd">		weekBest[i].clear();
+	}
+	for (int i = 0; i &lt; TWO_BEST_SLOT_NUM; i++)</span>
+	{
+<span style = "background-color:#dfd">		twoBest[i].clear();
+	}
+}</span>
+
+void KeywordFixTool::clearAlgorithm()
+<span style = "background-color:#dfd">{
+	if (algo != nullptr)</span>
+	{
+<span style = "background-color:#dfd">		delete algo;
+		algo = nullptr;</span>
+	}
+<span style = "background-color:#dfd">}</span></pre>
+        <hr />
+        <table width="100%">
+            <thead>
+                <tr>
+                    <th align="center">
+                        <small>Generated by</small>
+                        <a href="https://github.com/OpenCppCoverage/OpenCppCoverage/releases">
+                            <strong>OpenCppCoverage (Version: 0.9.9.0)</strong>
+                        </a>
+                    </th>
+                </tr>
+            </thead>
+        </table>
+    </body>
+</html>

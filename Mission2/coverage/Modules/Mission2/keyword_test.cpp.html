@@ -1,0 +1,307 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+        <meta charset="utf-8"/>
+	    <title>keyword_test.cpp</title>
+	    <link href="../../third-party/google-code-prettify/prettify-CppCoverage.css" type="text/css" rel="stylesheet" />
+	    <script type="text/javascript" src="../../third-party/google-code-prettify/prettify.js"></script>
+	</head>
+    <body onload="prettyPrint()">
+        <h4></h4>
+        <pre class="prettyprint lang-cpp linenums">
+#include "gmock/gmock.h"
+#include "fix_keyword.h"
+#include "levenshtein_algo.h"
+
+class FixKeywordTestFixture : public ::testing::Test
+{
+protected:
+	virtual void SetUp()
+<span style = "background-color:#dfd">	{
+		tool.initialize(ALGO_LEVENSHTEIN);
+	}</span>
+
+	virtual void TearDown()
+<span style = "background-color:#dfd">	{
+		tool.clearAlgorithm();
+	}</span>
+
+	KeywordFixTool tool;
+};
+
+<span style = "background-color:#dfd">TEST_F(FixKeywordTestFixture, ResetPointTest)
+{
+	tool.inputFile("keyword_weekday_500.txt");
+	EXPECT_TRUE(tool.UZ &gt; 9);</span>
+
+<span style = "background-color:#dfd">	tool.resetPoint(MAX_POINT);
+	EXPECT_EQ(tool.UZ, 9);
+}</span>
+
+<span style = "background-color:#dfd">TEST_F(FixKeywordTestFixture, WrongInputFileTest)
+{
+	tool.inputFile("keyword_weekday_5000000.txt");
+	EXPECT_EQ(tool.UZ, 9);
+}</span>
+
+<span style = "background-color:#dfd">TEST_F(FixKeywordTestFixture, WrongAlgoTest)
+{
+	tool.clearAlgorithm();
+	tool.initialize(ALGO_END);
+	EXPECT_EQ(nullptr, tool.algo);
+}</span>
+
+<span style = "background-color:#dfd">TEST_F(FixKeywordTestFixture, WrongInputTest)
+{
+	string ret = tool.fixKeyword("text", "someday");
+	EXPECT_EQ(ret, "");</span>
+
+<span style = "background-color:#dfd">	ret = tool.fixKeyword("text", "");
+	EXPECT_EQ(ret, "");
+}</span>
+
+<span style = "background-color:#dfd">TEST_F(FixKeywordTestFixture, CompleteHitTest)
+{
+	tool.fixKeyword("aaaaaa", "monday");
+	tool.fixKeyword("bbbbbb", "tuesday");
+	tool.fixKeyword("cccccc", "wednesday");
+	tool.fixKeyword("dddddd", "thursday");
+	tool.fixKeyword("eeeeee", "friday");
+	tool.fixKeyword("ffffff", "saturday");
+	tool.fixKeyword("gggggg", "sunday");</span>
+
+<span style = "background-color:#dfd">	int point = 0;
+	tool.fixKeyword("aaaaaa", "monday");
+	for (Node&amp; node : tool.weekBest[0])</span>
+	{
+<span style = "background-color:#dfd">		if (node.name == "aaaaaa")</span>
+		{
+<span style = "background-color:#dfd">			point = node.point;</span>
+		}
+<span style = "background-color:#dfd">	}
+	EXPECT_EQ(point, 11);</span>
+
+<span style = "background-color:#dfd">	tool.fixKeyword("bbbbbb", "monday");
+	for (Node&amp; node : tool.twoBest[0])</span>
+	{
+<span style = "background-color:#dfd">		if (node.name == "bbbbbb")</span>
+		{
+<span style = "background-color:#dfd">			point = node.point;</span>
+		}
+<span style = "background-color:#dfd">	}
+	EXPECT_EQ(point, 12);</span>
+
+<span style = "background-color:#dfd">	tool.fixKeyword("gggggg", "sunday");
+	for (Node&amp; node : tool.weekBest[6])</span>
+	{
+<span style = "background-color:#dfd">		if (node.name == "gggggg")</span>
+		{
+<span style = "background-color:#dfd">			point = node.point;</span>
+		}
+<span style = "background-color:#dfd">	}
+	EXPECT_EQ(point, 17);
+}</span>
+
+<span style = "background-color:#dfd">TEST_F(FixKeywordTestFixture, SimilarHitTest)
+{
+	tool.fixKeyword("aaaaaa", "monday");
+	tool.fixKeyword("bbbbbb", "tuesday");
+	tool.fixKeyword("cccccc", "wednesday");
+	tool.fixKeyword("dddddd", "thursday");
+	tool.fixKeyword("eeeeee", "friday");
+	tool.fixKeyword("ffffff", "saturday");
+	tool.fixKeyword("gggggg", "sunday");</span>
+
+<span style = "background-color:#dfd">	int point = 0;
+	tool.fixKeyword("aaaaa", "monday");
+	for (Node&amp; node : tool.weekBest[0])</span>
+	{
+<span style = "background-color:#dfd">		if (node.name == "aaaaaa")</span>
+		{
+<span style = "background-color:#dfd">			point = node.point;</span>
+		}
+<span style = "background-color:#dfd">	}
+	EXPECT_EQ(point, 10);</span>
+
+<span style = "background-color:#dfd">	tool.fixKeyword("bbbbb", "monday");
+	for (Node&amp; node : tool.twoBest[0])</span>
+	{
+<span style = "background-color:#dfd">		if (node.name == "bbbbbb")</span>
+		{
+<span style = "background-color:#dfd">			point = node.point;</span>
+		}
+<span style = "background-color:#dfd">	}
+	EXPECT_EQ(point, 11);</span>
+
+<span style = "background-color:#dfd">	tool.fixKeyword("ggggg", "sunday");
+	for (Node&amp; node : tool.weekBest[6])</span>
+	{
+<span style = "background-color:#dfd">		if (node.name == "gggggg")</span>
+		{
+<span style = "background-color:#dfd">			point = node.point;</span>
+		}
+<span style = "background-color:#dfd">	}
+	EXPECT_EQ(point, 16);
+}</span>
+
+<span style = "background-color:#dfd">TEST_F(FixKeywordTestFixture, NewInputTest)
+{
+	tool.fixKeyword("aaaaaa", "monday");
+	tool.fixKeyword("bbbbbb", "tuesday");
+	tool.fixKeyword("cccccc", "wednesday");
+	tool.fixKeyword("dddddd", "thursday");
+	tool.fixKeyword("eeeeee", "friday");
+	tool.fixKeyword("ffffff", "saturday");
+	tool.fixKeyword("gggggg", "sunday");</span>
+
+<span style = "background-color:#dfd">	int point = 0;
+	tool.fixKeyword("abcdef", "monday");
+	for (Node&amp; node : tool.weekBest[0])</span>
+	{
+<span style = "background-color:#dfd">		if (node.name == "aaaaaa")</span>
+		{
+<span style = "background-color:#dfd">			point = node.point;</span>
+		}
+<span style = "background-color:#dfd">	}
+	EXPECT_EQ(point, 10);</span>
+
+<span style = "background-color:#dfd">	for (Node&amp; node : tool.weekBest[0])</span>
+	{
+<span style = "background-color:#dfd">		if (node.name == "abcdef")</span>
+		{
+<span style = "background-color:#dfd">			point = node.point;</span>
+		}
+<span style = "background-color:#dfd">	}
+	EXPECT_EQ(point, 17);
+}</span>
+
+<span style = "background-color:#dfd">TEST_F(FixKeywordTestFixture, CompleteHitAfterRearrangeTest)
+{
+	tool.fixKeyword("aaaaaa", "monday");
+	tool.fixKeyword("bbbbbb", "tuesday");
+	tool.fixKeyword("cccccc", "wednesday");
+	tool.fixKeyword("dddddd", "thursday");
+	tool.fixKeyword("eeeeee", "friday");
+	tool.fixKeyword("ffffff", "saturday");
+	tool.fixKeyword("gggggg", "sunday");</span>
+
+<span style = "background-color:#dfd">	tool.resetPoint(MAX_POINT);</span>
+
+<span style = "background-color:#dfd">	int point = 0;
+	tool.fixKeyword("aaaaaa", "monday");
+	for (Node&amp; node : tool.weekBest[0])</span>
+	{
+<span style = "background-color:#dfd">		if (node.name == "aaaaaa")</span>
+		{
+<span style = "background-color:#dfd">			point = node.point;</span>
+		}
+<span style = "background-color:#dfd">	}
+	EXPECT_EQ(point, 2);</span>
+
+<span style = "background-color:#dfd">	tool.fixKeyword("bbbbbb", "monday");
+	for (Node&amp; node : tool.twoBest[0])</span>
+	{
+<span style = "background-color:#dfd">		if (node.name == "bbbbbb")</span>
+		{
+<span style = "background-color:#dfd">			point = node.point;</span>
+		}
+<span style = "background-color:#dfd">	}
+	EXPECT_EQ(point, 3);</span>
+
+<span style = "background-color:#dfd">	tool.fixKeyword("gggggg", "sunday");
+	for (Node&amp; node : tool.weekBest[6])</span>
+	{
+<span style = "background-color:#dfd">		if (node.name == "gggggg")</span>
+		{
+<span style = "background-color:#dfd">			point = node.point;</span>
+		}
+<span style = "background-color:#dfd">	}
+	EXPECT_EQ(point, 2);
+}</span>
+
+<span style = "background-color:#dfd">TEST_F(FixKeywordTestFixture, AddToFullListTest)
+{
+	tool.fixKeyword("aaaaaa", "monday");
+	tool.fixKeyword("bbbbbb", "monday");
+	tool.fixKeyword("cccccc", "monday");
+	tool.fixKeyword("dddddd", "monday");
+	tool.fixKeyword("eeeeee", "monday");
+	tool.fixKeyword("ffffff", "monday");
+	tool.fixKeyword("gggggg", "monday");
+	tool.fixKeyword("hhhhhh", "monday");
+	tool.fixKeyword("iiiiii", "monday");
+	tool.fixKeyword("jjjjjj", "monday");</span>
+
+<span style = "background-color:#dfd">	EXPECT_EQ(tool.weekBest[0].size(), 10);</span>
+
+<span style = "background-color:#dfd">	tool.fixKeyword("zzzzzz", "monday");</span>
+
+<span style = "background-color:#dfd">	EXPECT_EQ(tool.weekBest[0].size(), 10);</span>
+
+<span style = "background-color:#dfd">	int point = 0;
+	for (Node&amp; node : tool.weekBest[0])</span>
+	{
+<span style = "background-color:#dfd">		if (node.name == "zzzzzz")</span>
+		{
+<span style = "background-color:#dfd">			point = node.point;</span>
+		}
+<span style = "background-color:#dfd">	}
+	EXPECT_EQ(point, 20);
+}</span>
+
+<span style = "background-color:#dfd">TEST_F(FixKeywordTestFixture, IntegratedTest)
+{
+	tool.inputFile("keyword_weekday_500.txt");</span>
+
+<span style = "background-color:#dfd">	EXPECT_TRUE(tool.UZ &gt; 9);</span>
+
+<span style = "background-color:#dfd">	for (int i = 0; i &lt; WEEK_BEST_SLOT_NUM; i++)</span>
+	{
+<span style = "background-color:#dfd">		EXPECT_TRUE(tool.weekBest[i].size() &lt;= 10);
+	}
+	for (int i = 0; i &lt; TWO_BEST_SLOT_NUM; i++)</span>
+	{
+<span style = "background-color:#dfd">		EXPECT_TRUE(tool.twoBest[i].size() &lt;= 10);
+	}</span>
+
+<span style = "background-color:#dfd">	int expected = tool.UZ + 1;
+	string newKeyword = "new new text sample";
+	tool.fixKeyword(newKeyword, "monday");</span>
+
+<span style = "background-color:#dfd">	EXPECT_TRUE(tool.weekBest[0].size() &lt;= 10);</span>
+
+<span style = "background-color:#dfd">	int actual = 0;
+	for (Node&amp; node : tool.weekBest[0])</span>
+	{
+<span style = "background-color:#dfd">		if (node.name == newKeyword)</span>
+		{
+<span style = "background-color:#dfd">			actual = node.point;</span>
+		}
+<span style = "background-color:#dfd">	}
+	EXPECT_EQ(actual, expected);</span>
+
+<span style = "background-color:#dfd">	tool.fixKeyword(newKeyword, "monday");
+	for (Node&amp; node : tool.weekBest[0])</span>
+	{
+<span style = "background-color:#dfd">		if (node.name == newKeyword)</span>
+		{
+<span style = "background-color:#dfd">			actual = node.point;</span>
+		}
+<span style = "background-color:#dfd">	}
+	EXPECT_EQ(actual, expected * 1.1);
+}</span></pre>
+        <hr />
+        <table width="100%">
+            <thead>
+                <tr>
+                    <th align="center">
+                        <small>Generated by</small>
+                        <a href="https://github.com/OpenCppCoverage/OpenCppCoverage/releases">
+                            <strong>OpenCppCoverage (Version: 0.9.9.0)</strong>
+                        </a>
+                    </th>
+                </tr>
+            </thead>
+        </table>
+    </body>
+</html>
